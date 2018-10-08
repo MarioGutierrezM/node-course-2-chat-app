@@ -15,18 +15,34 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log('New user connected');
 
+    // show the message only for to the new connected user
     socket.emit('newMessage', {
-        from: 'MarIO@itx.net',
-        text: 'hello, this is a new message!',
-        createAt: new Date()
+        from: 'Administrator',
+        text: 'Welcome to the chat app',
+        createAt: new Date().getTime()
     });
 
-    socket.on('createEmail', (newEmail) => {
-        console.log('createEmail', JSON.stringify(newEmail, undefined, 2));
+    // broadcast makes the emit to the others users
+    socket.broadcast.emit('newMessage', {
+        from: 'Administrator',
+        text: 'New user joined',
+        createAt: new Date().getTime()
     });
 
     socket.on('createMessage', (newMessage) => {
         console.log('createMessage', JSON.stringify(newMessage, undefined, 2));
+
+        io.emit('newMessage', {
+            from: newMessage.from,
+            text: newMessage.text,
+            createAt: new Date().getTime()
+        });
+
+        // socket.broadcast.emit('newMessage', {
+        //     from: newMessage.from,
+        //     text: newMessage.text,
+        //     createAt: new Date().getTime()
+        // });
     });
 
     socket.on('disconnect', () => {
